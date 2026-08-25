@@ -6,7 +6,7 @@ def visualize(maps: pycolmap.Reconstruction) -> None:
   xyz = []
   rgb = []
   
-  for point3D_id, point3D in maps[0].points3D.items():
+  for point3D_id, point3D in maps.points3D.items():
       xyz.append(point3D.xyz)
       # PyCOLMAP stores colors as 0-255 integers; Open3D requires 0.0-1.0 floats
       rgb.append(point3D.color / 255.0)
