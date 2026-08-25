@@ -4,7 +4,7 @@ from functions import *
 
 def main() -> None:
   
-  path = '/kaggle/input/competitions/image-matching-challenge-2024/test/church/images'
+  path = './images'
   feature_dir = Path("./sample_test_features")
   images_list = list(Path(path).glob("*.png"))
 
