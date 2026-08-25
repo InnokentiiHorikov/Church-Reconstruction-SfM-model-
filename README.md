@@ -5,6 +5,6 @@ In this version, we are going to recreate structure from motion by classic compu
 If you want to see how model works, open the incremetal_sfm.ipynb 
 
 
-## RESULT OF REACREATION
+## RESULT OF RECREATION
 
 ![Logo](result.png)
