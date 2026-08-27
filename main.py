@@ -25,15 +25,22 @@ def main() -> None:
   # This does RANSAC
   pycolmap.match_exhaustive(database_path)
   
-  mapper_options = pycolmap.IncrementalPipelineOptions()
-  mapper_options.min_model_size = 8
-  mapper_options.max_num_models = 10
-
   #Incremental SfM
+  mapper_options = pycolmap.IncrementalPipelineOptions()
+  mapper_options.min_model_size = 2
+  mapper_options.max_num_models = 3
+  mapper_options.mapper.abs_pose_max_error = 4.0
+  mapper_options.mapper.filter_max_reproj_error = 4.0
+  mapper_options.mapper.abs_pose_min_num_inliers = 50
+  mapper_options.mapper.init_min_tri_angle = 3.0
+  mapper_options.mapper.init_min_num_inliers = 100
+  
+  
   maps = pycolmap.incremental_mapping(
       database_path=database_path, 
       image_path=images_dir,
-      output_path=Path.cwd() / "incremental_pipeline_outputs"
+      output_path=Path.cwd() / "incremental_pipeline_outputs",
+      options = mapper_options
   )
   #Visualizing a result
   visualize(maps[0])
