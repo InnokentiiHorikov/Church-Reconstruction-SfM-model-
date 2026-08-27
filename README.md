@@ -7,4 +7,4 @@ If you want to see how model works, open the incremetal_sfm.ipynb
 
 ## RESULT OF RECREATION
 
-![Logo](result.png)
+![Logo2](ALIKED+LightGLUE_result.png)
