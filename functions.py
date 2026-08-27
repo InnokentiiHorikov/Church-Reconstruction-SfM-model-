@@ -63,12 +63,19 @@ def keypoint_distances(
     feature_dir: Path,
     min_matches: int = 15,
     verbose: bool = False,
-    device: torch.device = 'cpu'
-    #device: torch.device = torch.device("cpu"),
+    device: torch.device = 'cpu',
+    n_layers: int = 9,
+    filter_threshold: float = 0.01,
+    depth_confidence: float = 0.95,
+    width_confidence: float = 0.95
 ) -> None:
 
     
-    matcher = LightGlue(features='aliked').eval().to(device)
+    matcher = LightGlue(features='aliked', 
+                        n_layers = n_layers,
+                        filter_threshold = filter_threshold,
+                        depth_confidence = depth_confidence,
+                        width_confidence = width_confidence).eval().to(device)
 
     features = torch.load('features.pt')
     
