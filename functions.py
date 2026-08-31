@@ -6,14 +6,71 @@ import tqdm
 from pathlib import Path
 import h5py
 import pycolmap
-import torch
+
+
 from lightglue import ALIKED, LightGlue
 from lightglue.utils import load_image, rbd
 
-import pickle
+import torch
+import torchvision
+from torchvision.models import vgg16
+from torch.nn.functional import cosine_similarity
+from torchvision.transforms import v2
+
 
 from database import *
 from h5py_file import *
+
+
+
+def embed_image(data_transform: v2.Compose,
+                model: torchvision.models,
+                path: Path | str):
+    "Output: Torch.Tensor[1, 4096]"
+    
+    image = load_image(path)
+    inputs = data_transforms(image).to(device).unsqueeze(dim = 0)
+    output = model(inputs)
+    
+    return output
+
+
+
+def image_similarity(
+    paths: list[Path] | list[str],
+    lower_border: float = 0.3,
+    upper_border: float = 0.99,
+    device: torch.device = 'cpu') -> list[tuple[int, int]]:
+    
+    data_transforms = v2.Compose([
+     v2.ToDtype(torch.float64, scale=True),    
+     v2.Resize((224, 224)),
+     v2.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+     ])
+    
+    model = vgg16(weights='DEFAULT').to(device)
+    model.classifier = model.classifier[:-1]
+    
+    list_of_pairs = []
+    temp_i = 1
+    n_images = len(paths)
+    image_1 = embed_image(data_transforms, model, paths[0])
+
+    with torch.inference_mode():
+
+        for i in tqdm(range(n_images-1), desc="Checking image similarities"):
+            if temp_i != i:
+                temp_i = i
+                image_1 = embed_image(data_transforms, model, paths[temp_i])
+           
+            for j in range(i+1, n_images):
+            
+                image_2 = embed_image(data_transforms, model, paths[j])
+                CosSim = cosine_similarity(image_1, image_2)
+                if (CosSim < upper_border) and (CosSim > lower_border): 
+                    list_of_pairs.append((i, j))
+
+    return list_of_pairs
 
 
 def detect_keypoints(
@@ -55,8 +112,7 @@ def detect_keypoints(
         torch.save(masters_dict, 'features.pt')
         
         
-            
-    
+             
 def keypoint_distances(
     paths: list[Path],
     index_pairs: list[tuple[int, int]],
