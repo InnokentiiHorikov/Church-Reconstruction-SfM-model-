@@ -7,11 +7,12 @@ def main() -> None:
   path = './images'
   feature_dir = Path("./sample_test_features")
   images_list = list(Path(path).glob("*.png"))
-
-  #SIFT
+  device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  #ALIKED 
   detect_keypoints(images_list, feature_dir)
-  all_pairs = list(itertools.combinations([i for i in range(len(images_list))], 2))
-  #BFMatcher
+  #VGG16
+  all_pairs = image_similarity(images_list, device = device)
+  #LightGlue
   keypoint_distances(images_list, all_pairs, feature_dir)
 
   database_path = "colmap.db"
@@ -29,11 +30,12 @@ def main() -> None:
   mapper_options = pycolmap.IncrementalPipelineOptions()
   mapper_options.min_model_size = 2
   mapper_options.max_num_models = 3
-  mapper_options.mapper.abs_pose_max_error = 4.0
-  mapper_options.mapper.filter_max_reproj_error = 4.0
-  mapper_options.mapper.abs_pose_min_num_inliers = 50
-  mapper_options.mapper.init_min_tri_angle = 3.0
-  mapper_options.mapper.init_min_num_inliers = 100
+  mapper_options.mapper.abs_pose_max_error = 7.0
+  mapper_options.mapper.filter_max_reproj_error = 6.0
+  mapper_options.mapper.abs_pose_min_num_inliers = 40
+  mapper_options.mapper.init_min_tri_angle = 6.0
+  mapper_options.mapper.init_min_num_inliers = 50
+  mapper_options.triangulation.ignore_two_view_tracks = False
   
   
   maps = pycolmap.incremental_mapping(
